@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Image Diff Tool</title>
+    <!-- Libraries -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/resemblejs@5.0.0/resemble.js"></script>
+    <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="sidebar">
+        <!-- BASE DROP ZONE -->
+        <div class="drop-zone" id="zone-base">
+            <div class="control-header">
+                <label>1. Base Image</label>
+            </div>
+            <input type="file" id="input-base">
+            <div id="base-name-display" class="file-name-display">Not loaded</div>
+        </div>
+        
+        <!-- COMPS DROP ZONE -->
+        <div class="drop-zone" id="zone-comps">
+            <div class="control-header">
+                <label>2. Comparisons</label>
+                <span class="file-count" id="comp-count">0 items</span>
+            </div>
+            <input type="file" id="input-comps" multiple>
+        </div>
+
+        <!-- CONTROLS -->
+        <div style="padding: 0 5px;">
+            <div class="btn-row">
+                <button class="btn active" id="mode-slider">Slider</button>
+                <button class="btn btn-icon" id="toggle-settings" title="Diff Settings">🛠️</button>
+                <button class="btn" id="mode-diff">Diff</button>
+            </div>
+
+            <!-- HIDDEN SETTINGS -->
+            <div id="diff-settings">
+                <div class="setting-row">
+                    <label>Diff Color</label>
+                    <div class="swatch-container">
+                        <div class="swatch selected" style="background:#FF00FF;" data-color='{"r":255,"g":0,"b":255}'></div>
+                        <div class="swatch" style="background:#00FF00;" data-color='{"r":0,"g":255,"b":0}'></div>
+                        <div class="swatch" style="background:#808080; border:1px solid #555;" data-color='{"r":127,"g":127,"b":127}'></div>
+                        <div class="swatch" style="background:#FFFFFF;" data-color='{"r":255,"g":255,"b":255}'></div>
+                        <div class="swatch" style="background:#000000; border:1px solid #555;" data-color='{"r":0,"g":0,"b":0}'></div>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label>Similarity Logic</label>
+                    <div class="radio-group">
+                        <label class="radio-label"><input type="radio" name="sens" value="all" checked> All (Strict)</label>
+                        <label class="radio-label"><input type="radio" name="sens" value="colors"> Ignore Colors (Luna)</label>
+                        <label class="radio-label"><input type="radio" name="sens" value="aa"> Ignore Antialiasing</label>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn" id="btn-hold" style="width:100%; margin-top:5px; background: #444;">Hold to Swap</button>
+            <!--
+            <button class="btn" id="btn-sort" style="width:100%; margin-top:5px;" onclick="updateListSorted()">Sort by Similarity</button>
+            -->
+        </div>
+
+        <!-- LIST -->
+        <ul id="comp-list"></ul>
+
+        <!-- HINT FOOTER -->
+        <div class="hint-text">Zoom: Wheel | Pan: Drag | Slider: Mouse Move</div>
+    </div>
+
+    <div class="main-view">
+        <div id="global-status">Ready</div>
+        <div id="panzoom-container" class="wrapper">
+            <!-- 1. Base Image (Right Side in Slider / Background) -->
+            <img id="base-img-display" class="layer" src="">
+            
+            <!-- 2. Comparison Image Layer (Left Side in Slider / Masked) -->
+            <div id="comp-layer" class="layer">
+                <img id="comp-img-display" src="">
+            </div>
+
+            <!-- 3. Diff Overlay (Top) -->
+            <img id="diff-overlay" class="layer" src="">
+        </div>
+
+        <!-- Labels (Fixed in Main View) -->
+        <div id="label-left" class="img-label left">Modified</div>
+        <div id="label-right" class="img-label right">Base</div>
+    </div>
+<script src="script.js"></script>
+</body>
+</html>
