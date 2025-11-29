@@ -4,11 +4,11 @@ A simple offline browser tool for comparing a single source image with multiple 
 Demo: 
 https://rusauron.github.io/images-compare/
 
-![Drag&drop base image and another ones](1_drag-n-drop_files.png)
+![Drag&drop base image and another ones](images/1_drag-n-drop_files.png)
 
-![Use slider to compare images](2_use_slider.png)
+![Use slider to compare images](images/2_use_slider.png)
 
-![Mark diff between images](3_check_diff.png)
+![Mark diff between images](images/3_check_diff.png)
 
 This code was written almost entirely by Gemini 3.
 The code successfully performs the task I designed it for.

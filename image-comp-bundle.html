@@ -1476,11 +1476,13 @@ var isNode = function () {
         
         if (viewMode === 'diff' && diffData) {
             $('#diff-overlay').attr('src', diffData).css('opacity', 1);
-            $('#comp-layer').css('opacity', 0); 
+            // Показываем слой сравнения на всю ширину под Diff, чтобы видеть контекст варианта, а не базы
+            $('#comp-layer').css({ opacity: 1, width: '100%' }).addClass('no-border');
         } else {
             $('#diff-overlay').css('opacity', 0);
-            $('#comp-layer').css('opacity', 1);
+            $('#comp-layer').css('opacity', 1).removeClass('no-border');
         }
+
         
         flashLabels(); // Show labels for 2 seconds
     }
