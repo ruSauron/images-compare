@@ -1,11 +1,11 @@
 /* --- STATE --- */
-let baseData = null; 
-let compsList = []; 
-let currentId = null; 
-let viewMode = 'slider'; 
+let baseData = null;
+let compsList = [];
+let currentId = null;
+let viewMode = 'slider'; // 'slider' | 'diff'
 let diffColor = { red: 255, green: 0, blue: 255 };
-let sensitivity = 'all'; 
-let pz; 
+let sensitivity = 'all';
+let pz;
 let labelTimer = null;
 
 const MODES = ['all', 'colors', 'aa'];
@@ -15,7 +15,7 @@ $(document).ready(() => {
     const elem = document.getElementById('panzoom-container');
     pz = Panzoom(elem, { maxScale: 15, canvas: true });
     elem.parentElement.addEventListener('wheel', pz.zoomWithWheel);
-    
+
     initDragDrop();
     setupEventHandlers();
 });
@@ -34,7 +34,7 @@ function initDragDrop() {
         $zone.on('drop', async (e) => {
             const files = e.originalEvent.dataTransfer.files;
             if(files.length > 0) {
-                if(isBase) handleBaseFiles([files[0]]); 
+                if(isBase) handleBaseFiles([files[0]]);
                 else handleCompFiles(files);
             }
         });
@@ -50,19 +50,23 @@ $('#input-comps').change((e) => handleCompFiles(e.target.files));
 function handleBaseFiles(files) {
     if(!files || !files.length) return;
     const file = files[0];
+    
     const reader = new FileReader();
     reader.onload = (e) => {
         const img = new Image();
         img.onload = async () => {
             baseData = { src: e.target.result, w: img.width, h: img.height, name: file.name };
+            
             $('#base-name-display').text(`${file.name} (${img.width}x${img.height})`);
             
+            // Устанавливаем размеры ТОЛЬКО на обертку.
             $('.wrapper').css({ width: img.width + 'px', height: img.height + 'px' });
-            $('#comp-img-display').css('width', img.width + 'px');
-
+            
+            // Пересчитываем сравнения если уже есть
             if(compsList.length > 0) await recalculateAllComps();
+            
             updateView();
-        }
+        };
         img.src = e.target.result;
     };
     reader.readAsDataURL(file);
@@ -74,11 +78,14 @@ async function handleCompFiles(files) {
 
     for(let i=0; i<files.length; i++) {
         await addCompImage(files[i]);
-        showStatus(`Calculated ${i+1}/${files.length}`);
     }
-    
+
+    // FIX: Обновляем UI (сортировка + рендер) после добавления всех файлов
     updateListSorted();
+
+    // Если ничего не выбрано, выбираем первое
     if(!currentId && compsList.length > 0) selectComp(compsList[0].id);
+    
     showStatus('Done.', true);
 }
 
@@ -110,12 +117,13 @@ async function calculateAllModes(baseSrc, compSrc) {
         let r = resemble(baseSrc).compareTo(compSrc);
         if(mode === 'colors') r.ignoreColors();
         if(mode === 'aa') r.ignoreAntialiasing();
-
         r.onComplete((data) => {
             res({ mismatch: parseFloat(data.misMatchPercentage), diffSrc: data.getImageDataUrl() });
         });
     });
+
     resemble.outputSettings({ errorColor: diffColor, errorType: 'flat', transparency: 0.3 });
+    
     const [rAll, rColors, rAA] = await Promise.all([run('all'), run('colors'), run('aa')]);
     return { all: rAll, colors: rColors, aa: rAA };
 }
@@ -131,6 +139,7 @@ async function recalculateAllComps() {
 
 /* --- UI LIST --- */
 function updateListSorted() {
+    // Сортировка по возрастанию % отличий (самые похожие сверху)
     compsList.sort((a, b) => a.results[sensitivity].mismatch - b.results[sensitivity].mismatch);
     renderListHTML();
     $('#comp-count').text(`${compsList.length} items`);
@@ -142,12 +151,16 @@ function renderListHTML() {
     compsList.forEach((item) => {
         const metric = item.results[sensitivity];
         const isActive = item.id === currentId;
+        // Округляем до 2 знаков для красоты
+        const scoreVal = metric ? metric.mismatch.toFixed(2) : '0.00';
+        
         const html = `
-        <li class="comp-item ${isActive ? 'active' : ''}" onclick="selectComp('${item.id}')">
-            <button class="btn-del" onclick="deleteComp(event, '${item.id}')">×</button>
-            <div class="item-name" title="${item.name}">${item.name}</div>
-            <div class="diff-score">${metric.mismatch}%</div>
-        </li>`;
+            <li class="comp-item ${isActive ? 'active' : ''}" onclick="selectComp('${item.id}')">
+                <button class="btn-del" onclick="deleteComp(event, '${item.id}')">×</button>
+                <div class="item-name" title="${item.name}">${item.name}</div>
+                <div class="diff-score">${scoreVal}%</div>
+            </li>
+        `;
         $ul.append(html);
     });
 }
@@ -156,6 +169,7 @@ window.deleteComp = function(e, id) {
     e.stopPropagation();
     const idx = compsList.findIndex(x => x.id === id);
     if(idx === -1) return;
+    
     if(id === currentId) {
         if(compsList.length > 1) {
             const newIdx = idx > 0 ? idx - 1 : idx + 1;
@@ -164,48 +178,28 @@ window.deleteComp = function(e, id) {
             currentId = null;
             $('#comp-img-display').attr('src', '');
             $('#diff-overlay').attr('src', '');
-            flashLabels();
+            updateView();
         }
     }
     compsList.splice(idx, 1);
     updateListSorted();
-}
+};
 
 window.selectComp = function(id) {
     currentId = id;
-    renderListHTML();
+    renderListHTML(); // Перерисовка для обновления класса .active
     updateView();
-}
+};
 
-$('input[name="sens"]').change(function() {
-    sensitivity = $(this).val();
-    updateListSorted();
-    updateView(); 
-});
+/* --- VIEW & SLIDER LOGIC --- */
+let lastSliderPct = 50;
 
-$('.swatch').click(function() {
-    // Visual color switch
-    $('.swatch').removeClass('selected');
-    $(this).addClass('selected');
-
-    // Update global vars
-    const c = $(this).data('color');
-    diffColor = { red: c.r, green: c.g, blue: c.b };
-
-    // Recalculate (all, colors, aa)
-    if(currentId && baseData) {
-        const item = compsList.find(x => x.id === currentId);
-        calculateAllModes(baseData.src, item.src).then(results => {
-            item.results = results;
-            updateView();
-        });
-    }
-});
-
-/* --- VIEW RENDERING --- */
 function updateView() {
-    if(!currentId || !baseData) { flashLabels(); return; }
-    
+    if(!currentId || !baseData) { 
+        $('.img-label').hide(); 
+        return; 
+    }
+
     const item = compsList.find(x => x.id === currentId);
     if(!item) return;
 
@@ -213,18 +207,26 @@ function updateView() {
     $('#comp-img-display').attr('src', item.src);
     
     const diffData = item.results[sensitivity].diffSrc;
-    
+    $('#diff-overlay').attr('src', diffData || '');
+
     if (viewMode === 'diff' && diffData) {
-        $('#diff-overlay').attr('src', diffData).css('opacity', 1);
-        // Показываем слой сравнения на всю ширину под Diff, чтобы видеть контекст варианта, а не базы
-        $('#comp-layer').css({ opacity: 1, width: '100%' }).addClass('no-border');
+        $('#diff-overlay').css('opacity', 1);
+        $('#slider-line').hide();
+        $('#comp-img-display').css('clip-path', 'none');
+        $('#comp-img-display').css('opacity', 1);
     } else {
         $('#diff-overlay').css('opacity', 0);
-        $('#comp-layer').css('opacity', 1).removeClass('no-border');
+        $('#comp-img-display').css('opacity', 1);
+        applySliderClip(lastSliderPct);
+        $('#slider-line').show();
     }
+    flashLabels();
+}
 
-    
-    flashLabels(); // Show labels for 2 seconds
+function applySliderClip(pct) {
+    const insetRight = 100 - pct;
+    $('#comp-img-display').css('clip-path', `inset(0 ${insetRight}% 0 0)`);
+    $('#slider-line').css('left', `${pct}%`);
 }
 
 /* --- LABELS LOGIC --- */
@@ -233,42 +235,35 @@ function flashLabels(forceState = null) {
         $('.img-label').hide();
         return;
     }
-    
+
     const item = compsList.find(x => x.id === currentId);
     const baseName = baseData.name;
     const compName = item.name;
-    
+
     let txtLeft = '', txtRight = '';
-    
+
     if (forceState === 'hover_swap') {
-        // Showing COMP full
-        txtLeft = compName; 
-        txtRight = ''; 
+        txtLeft = compName;
+        txtRight = '';
     } else if (forceState === 'hold_swap') {
-        // Showing BASE full
         txtLeft = '';
         txtRight = baseName;
     } else {
-        // Normal Mode
         if (viewMode === 'slider') {
             txtLeft = compName;
             txtRight = baseName;
         } else {
-            txtLeft = compName; // Diff doesn't show base
+            txtLeft = compName; 
             txtRight = '';
         }
     }
 
-    // Apply Text
     $('#label-left').text(txtLeft).toggle(!!txtLeft);
     $('#label-right').text(txtRight).toggle(!!txtRight);
 
-    // Visibility Logic
     $('.img-label').stop(true, true).css('opacity', 1).show();
-
-    if (labelTimer) clearTimeout(labelTimer);
     
-    // If forceState is active (interacting), keep shown. Else fade out.
+    if (labelTimer) clearTimeout(labelTimer);
     if (!forceState) {
         labelTimer = setTimeout(() => {
             $('.img-label').fadeOut(500);
@@ -278,17 +273,37 @@ function flashLabels(forceState = null) {
 
 function setupEventHandlers() {
     $('#toggle-settings').click(() => $('#diff-settings').slideToggle(200));
-    
-    $('#mode-slider').click(function() { 
-        viewMode = 'slider'; 
-        $('.btn').removeClass('active'); $(this).addClass('active'); 
-        updateView(); 
+
+    $('input[name="sens"]').change(function() {
+        sensitivity = $(this).val();
+        updateListSorted();
+        updateView();
     });
-    
-    $('#mode-diff').click(function() { 
-        viewMode = 'diff'; 
-        $('.btn').removeClass('active'); $(this).addClass('active'); 
-        updateView(); 
+
+    $('.swatch').click(function() {
+        $('.swatch').removeClass('selected');
+        $(this).addClass('selected');
+        const c = $(this).data('color');
+        diffColor = { red: c.r, green: c.g, blue: c.b };
+        if(currentId && baseData) {
+            const item = compsList.find(x => x.id === currentId);
+            calculateAllModes(baseData.src, item.src).then(results => {
+                item.results = results;
+                updateView();
+            });
+        }
+    });
+
+    $('#mode-slider').click(function() {
+        viewMode = 'slider';
+        $('.btn').removeClass('active'); $(this).addClass('active');
+        updateView();
+    });
+
+    $('#mode-diff').click(function() {
+        viewMode = 'diff';
+        $('.btn').removeClass('active'); $(this).addClass('active');
+        updateView();
     });
 
     setupSliderInteraction();
@@ -296,58 +311,52 @@ function setupEventHandlers() {
 
 /* --- SLIDER & HOLD INTERACTION --- */
 function setupSliderInteraction() {
-    let lastSliderPct = 50;
     let isHoldingSwap = false;
     let isHoveringSwap = false;
-    
-    const $swapBtn = $('#btn-hold');
-    const $sliderLayer = $('#comp-layer');
-    const $diffOverlay = $('#diff-overlay');
 
-    // SLIDER MOVE
+    const $swapBtn = $('#btn-hold');
+    const $compImg = $('#comp-img-display');
+    const $diffOverlay = $('#diff-overlay');
+    const $sliderLine = $('#slider-line');
+
     $('.wrapper').mousemove(function(e) {
         if (viewMode !== 'slider' || isHoldingSwap || isHoveringSwap) return;
+
         const rect = this.getBoundingClientRect();
         const x = e.clientX - rect.left;
         let pct = (x / rect.width) * 100;
         pct = Math.max(0, Math.min(100, pct));
+        
         lastSliderPct = pct;
-        $sliderLayer.css('width', pct + '%');
+        applySliderClip(pct);
     });
 
-    // HOVER (Show COMP)
     $swapBtn.mouseenter(() => {
         isHoveringSwap = true;
-        $sliderLayer.addClass('no-border');
-        
         if (viewMode === 'slider') {
-            $sliderLayer.css('width', '100%');
+            applySliderClip(100);
+            $sliderLine.hide();
         } else if (viewMode === 'diff') {
             $diffOverlay.css('opacity', 0);
-            $sliderLayer.css('opacity', 1);
-            $sliderLayer.css('width', '100%');
+            $compImg.css('opacity', 1);
         }
         flashLabels('hover_swap');
     });
 
     $swapBtn.mouseleave(() => {
         isHoveringSwap = false;
-        if (!isHoldingSwap) resetView();
+        if (!isHoldingSwap) resetViewToCurrentMode();
     });
 
-    // HOLD (Show BASE)
     $swapBtn.mousedown((e) => {
         if(e.button !== 0) return;
         isHoldingSwap = true;
-        $sliderLayer.addClass('no-border');
-        
-        // Hide Comp -> Show Base
         if (viewMode === 'slider') {
-            $sliderLayer.css('width', '0%');
+            applySliderClip(0);
+            $sliderLine.hide();
         } else if (viewMode === 'diff') {
             $diffOverlay.css('opacity', 0);
-            $sliderLayer.css('opacity', 1);
-            $sliderLayer.css('width', '0%');
+            $compImg.css('opacity', 0);
         }
         flashLabels('hold_swap');
     });
@@ -355,34 +364,34 @@ function setupSliderInteraction() {
     $(window).mouseup(() => {
         if(isHoldingSwap) {
             isHoldingSwap = false;
-            // If still hovering, return to Hover state (Full Comp)
             if ($swapBtn.is(':hover')) {
                 isHoveringSwap = true;
                 if (viewMode === 'slider') {
-                    $sliderLayer.css('width', '100%');
-                } else if (viewMode === 'diff') {
+                    applySliderClip(100);
+                    $sliderLine.hide();
+                } else {
                     $diffOverlay.css('opacity', 0);
-                    $sliderLayer.css('opacity', 1);
-                    $sliderLayer.css('width', '100%');
+                    $compImg.css('opacity', 1);
                 }
                 flashLabels('hover_swap');
             } else {
-                resetView();
+                resetViewToCurrentMode();
             }
         }
     });
 
-    function resetView() {
-        $sliderLayer.removeClass('no-border');
-        flashLabels(); // Trigger fade out
-        
+    function resetViewToCurrentMode() {
+        flashLabels();
         if (viewMode === 'slider') {
-            $sliderLayer.css('width', lastSliderPct + '%');
-            $sliderLayer.css('opacity', 1);
+            applySliderClip(lastSliderPct);
+            $sliderLine.show();
+            $compImg.css('opacity', 1);
             $diffOverlay.css('opacity', 0);
         } else if (viewMode === 'diff') {
+            $compImg.css('clip-path', 'none');
+            $sliderLine.hide();
             $diffOverlay.css('opacity', 1);
-            $sliderLayer.css('opacity', 0);
+            $compImg.css('opacity', 1);
         }
     }
 }

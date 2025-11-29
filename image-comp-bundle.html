@@ -1098,80 +1098,125 @@ var isNode = function () {
 */
 !function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):(t="undefined"!=typeof globalThis?globalThis:t||self).Panzoom=e()}(this,function(){"use strict";var Y=function(){return(Y=Object.assign||function(t){for(var e,n=1,o=arguments.length;n<o;n++)for(var r in e=arguments[n])Object.prototype.hasOwnProperty.call(e,r)&&(t[r]=e[r]);return t}).apply(this,arguments)};function C(t,e){for(var n=t.length;n--;)if(t[n].pointerId===e.pointerId)return n;return-1}function T(t,e){if(e.touches)for(var n=0,o=0,r=e.touches;o<r.length;o++){var a=r[o];a.pointerId=n++,T(t,a)}else-1<(n=C(t,e))&&t.splice(n,1),t.push(e)}function N(t){for(var e,n=(t=t.slice(0)).pop();e=t.pop();)n={clientX:(e.clientX-n.clientX)/2+n.clientX,clientY:(e.clientY-n.clientY)/2+n.clientY};return n}function L(t){var e;return t.length<2?0:(e=t[0],t=t[1],Math.sqrt(Math.pow(Math.abs(t.clientX-e.clientX),2)+Math.pow(Math.abs(t.clientY-e.clientY),2)))}"undefined"!=typeof window&&(window.NodeList&&!NodeList.prototype.forEach&&(NodeList.prototype.forEach=Array.prototype.forEach),"function"!=typeof window.CustomEvent&&(window.CustomEvent=function(t,e){e=e||{bubbles:!1,cancelable:!1,detail:null};var n=document.createEvent("CustomEvent");return n.initCustomEvent(t,e.bubbles,e.cancelable,e.detail),n}));var V={down:"mousedown",move:"mousemove",up:"mouseup mouseleave"};function D(t,e,n,o){V[t].split(" ").forEach(function(t){e.addEventListener(t,n,o)})}function G(t,e,n){V[t].split(" ").forEach(function(t){e.removeEventListener(t,n)})}"undefined"!=typeof window&&("function"==typeof window.PointerEvent?V={down:"pointerdown",move:"pointermove",up:"pointerup pointerleave pointercancel"}:"function"==typeof window.TouchEvent&&(V={down:"touchstart",move:"touchmove",up:"touchend touchcancel"}));var a,i="undefined"!=typeof document&&!!document.documentMode;var c=["webkit","moz","ms"],l={};function I(t){if(l[t])return l[t];var e=a=a||document.createElement("div").style;if(t in e)return l[t]=t;for(var n=t[0].toUpperCase()+t.slice(1),o=c.length;o--;){var r="".concat(c[o]).concat(n);if(r in e)return l[t]=r}}function o(t,e){return parseFloat(e[I(t)])||0}function s(t,e,n){void 0===n&&(n=window.getComputedStyle(t));t="border"===e?"Width":"";return{left:o("".concat(e,"Left").concat(t),n),right:o("".concat(e,"Right").concat(t),n),top:o("".concat(e,"Top").concat(t),n),bottom:o("".concat(e,"Bottom").concat(t),n)}}function W(t,e,n){t.style[I(e)]=n}function Z(t){var e=t.parentNode,n=window.getComputedStyle(t),o=window.getComputedStyle(e),r=t.getBoundingClientRect(),a=e.getBoundingClientRect();return{elem:{style:n,width:r.width,height:r.height,top:r.top,bottom:r.bottom,left:r.left,right:r.right,margin:s(t,"margin",n),border:s(t,"border",n)},parent:{style:o,width:a.width,height:a.height,top:a.top,bottom:a.bottom,left:a.left,right:a.right,padding:s(e,"padding",o),border:s(e,"border",o)}}}var q=/^http:[\w\.\/]+svg$/;var B={animate:!1,canvas:!1,cursor:"move",disablePan:!1,disableZoom:!1,disableXAxis:!1,disableYAxis:!1,duration:200,easing:"ease-in-out",exclude:[],excludeClass:"panzoom-exclude",handleStartEvent:function(t){t.preventDefault(),t.stopPropagation()},maxScale:4,minScale:.125,overflow:"hidden",panOnlyWhenZoomed:!1,pinchAndPan:!1,relative:!1,setTransform:function(t,e,n){var o=e.x,r=e.y,a=e.scale,e=e.isSVG;W(t,"transform","scale(".concat(a,") translate(").concat(o,"px, ").concat(r,"px)")),e&&i&&(a=window.getComputedStyle(t).getPropertyValue("transform"),t.setAttribute("transform",a))},startX:0,startY:0,startScale:1,step:.3,touchAction:"none"};function t(u,f){if(!u)throw new Error("Panzoom requires an element as an argument");if(1!==u.nodeType)throw new Error("Panzoom requires an element with a nodeType of 1");if(e=(t=u).ownerDocument,t=t.parentNode,!(e&&t&&9===e.nodeType&&1===t.nodeType&&e.documentElement.contains(t)))throw new Error("Panzoom should be called on elements that have been attached to the DOM");f=Y(Y({},B),f),e=u;var t,e,l=q.test(e.namespaceURI)&&"svg"!==e.nodeName.toLowerCase(),n=u.parentNode;n.style.overflow=f.overflow,n.style.userSelect="none",n.style.touchAction=f.touchAction,(f.canvas?n:u).style.cursor=f.cursor,u.style.userSelect="none",u.style.touchAction=f.touchAction,W(u,"transformOrigin","string"==typeof f.origin?f.origin:l?"0 0":"50% 50%");var r,a,i,c,s,d,m=0,h=0,v=1,p=!1;function g(t,e,n){n.silent||(n=new CustomEvent(t,{detail:e}),u.dispatchEvent(n))}function y(o,r,t){var a={x:m,y:h,scale:v,isSVG:l,originalEvent:t};return requestAnimationFrame(function(){var t,e,n;"boolean"==typeof r.animate&&(r.animate?(t=u,e=r,n=I("transform"),W(t,"transition","".concat(n," ").concat(e.duration,"ms ").concat(e.easing))):W(u,"transition","none")),r.setTransform(u,a,r),g(o,a,r),g("panzoomchange",a,r)}),a}function w(t,e,n,o){var r,a,i,c,l,s,d,o=Y(Y({},f),o),p={x:m,y:h,opts:o};return!o.force&&(o.disablePan||o.panOnlyWhenZoomed&&v===o.startScale)||(t=parseFloat(t),e=parseFloat(e),o.disableXAxis||(p.x=(o.relative?m:0)+t),o.disableYAxis||(p.y=(o.relative?h:0)+e),o.contain&&(e=((r=(e=(t=Z(u)).elem.width/v)*n)-e)/2,i=((a=(i=t.elem.height/v)*n)-i)/2,"inside"===o.contain?(c=(-t.elem.margin.left-t.parent.padding.left+e)/n,l=(t.parent.width-r-t.parent.padding.left-t.elem.margin.left-t.parent.border.left-t.parent.border.right+e)/n,p.x=Math.max(Math.min(p.x,l),c),s=(-t.elem.margin.top-t.parent.padding.top+i)/n,d=(t.parent.height-a-t.parent.padding.top-t.elem.margin.top-t.parent.border.top-t.parent.border.bottom+i)/n,p.y=Math.max(Math.min(p.y,d),s)):"outside"===o.contain&&(c=(-(r-t.parent.width)-t.parent.padding.left-t.parent.border.left-t.parent.border.right+e)/n,l=(e-t.parent.padding.left)/n,p.x=Math.max(Math.min(p.x,l),c),s=(-(a-t.parent.height)-t.parent.padding.top-t.parent.border.top-t.parent.border.bottom+i)/n,d=(i-t.parent.padding.top)/n,p.y=Math.max(Math.min(p.y,d),s))),o.roundPixels&&(p.x=Math.round(p.x),p.y=Math.round(p.y))),p}function b(t,e){var n,o,r,a,e=Y(Y({},f),e),i={scale:v,opts:e};return!e.force&&e.disableZoom||(n=f.minScale,o=f.maxScale,e.contain&&(a=(e=Z(u)).elem.width/v,r=e.elem.height/v,1<a&&1<r&&(a=(e.parent.width-e.parent.border.left-e.parent.border.right)/a,e=(e.parent.height-e.parent.border.top-e.parent.border.bottom)/r,"inside"===f.contain?o=Math.min(o,a,e):"outside"===f.contain&&(n=Math.max(n,a,e)))),i.scale=Math.min(Math.max(t,n),o)),i}function x(t,e,n,o){t=w(t,e,v,n);return m!==t.x||h!==t.y?(m=t.x,h=t.y,y("panzoompan",t.opts,o)):{x:m,y:h,scale:v,isSVG:l,originalEvent:o}}function E(t,e,n){var o,r,e=b(t,e),a=e.opts;if(a.force||!a.disableZoom)return t=e.scale,e=m,o=h,a.focal&&(e=((r=a.focal).x/t-r.x/v+m*t)/t,o=(r.y/t-r.y/v+h*t)/t),r=w(e,o,t,{relative:!1,force:!0}),m=r.x,h=r.y,v=t,y("panzoomzoom",a,n)}function o(t,e){e=Y(Y(Y({},f),{animate:!0}),e);return E(v*Math.exp((t?1:-1)*e.step),e)}function S(t,e,n,o){var r=Z(u),a=r.parent.width-r.parent.padding.left-r.parent.padding.right-r.parent.border.left-r.parent.border.right,i=r.parent.height-r.parent.padding.top-r.parent.padding.bottom-r.parent.border.top-r.parent.border.bottom,c=e.clientX-r.parent.left-r.parent.padding.left-r.parent.border.left-r.elem.margin.left,e=e.clientY-r.parent.top-r.parent.padding.top-r.parent.border.top-r.elem.margin.top,r=(l||(c-=r.elem.width/v/2,e-=r.elem.height/v/2),{x:c/a*(a*t),y:e/i*(i*t)});return E(t,Y(Y({},n),{animate:!1,focal:r}),o)}E(f.startScale,{animate:!1,force:!0}),setTimeout(function(){x(f.startX,f.startY,{animate:!1,force:!0})});var M=[];function A(t){!function(t,e){for(var n,o,r=t;null!=r;r=r.parentNode)if(n=r,o=e.excludeClass,1===n.nodeType&&-1<" ".concat((n.getAttribute("class")||"").trim()," ").indexOf(" ".concat(o," "))||-1<e.exclude.indexOf(r))return 1}(t.target,f)&&(T(M,t),p=!0,f.handleStartEvent(t),g("panzoomstart",{x:r=m,y:a=h,scale:v,isSVG:l,originalEvent:t},f),t=N(M),i=t.clientX,c=t.clientY,s=v,d=L(M))}function P(t){var e,n,o;p&&void 0!==r&&void 0!==a&&void 0!==i&&void 0!==c&&(T(M,t),e=N(M),n=1<M.length,o=v,n&&(0===d&&(d=L(M)),S(o=b((L(M)-d)*f.step/80+s).scale,e,{animate:!1},t)),n&&!f.pinchAndPan||x(r+(e.clientX-i)/o,a+(e.clientY-c)/o,{animate:!1},t))}function O(t){1===M.length&&g("panzoomend",{x:m,y:h,scale:v,isSVG:l,originalEvent:t},f);var e=M;if(t.touches)for(;e.length;)e.pop();else{t=C(e,t);-1<t&&e.splice(t,1)}p&&(p=!1,r=a=i=c=void 0)}var z=!1;function X(){z||(z=!0,D("down",f.canvas?n:u,A),D("move",document,P,{passive:!0}),D("up",document,O,{passive:!0}))}return f.noBind||X(),{bind:X,destroy:function(){z=!1,G("down",f.canvas?n:u,A),G("move",document,P),G("up",document,O)},eventNames:V,getPan:function(){return{x:m,y:h}},getScale:function(){return v},getOptions:function(){var t,e=f,n={};for(t in e)e.hasOwnProperty(t)&&(n[t]=e[t]);return n},handleDown:A,handleMove:P,handleUp:O,pan:x,reset:function(t){var t=Y(Y(Y({},f),{animate:!0,force:!0}),t),e=(v=b(t.startScale,t).scale,w(t.startX,t.startY,v,t));return m=e.x,h=e.y,y("panzoomreset",t)},resetStyle:function(){n.style.overflow="",n.style.userSelect="",n.style.touchAction="",n.style.cursor="",u.style.cursor="",u.style.userSelect="",u.style.touchAction="",W(u,"transformOrigin","")},setOptions:function(t){for(var e in t=void 0===t?{}:t)t.hasOwnProperty(e)&&(f[e]=t[e]);(t.hasOwnProperty("cursor")||t.hasOwnProperty("canvas"))&&(n.style.cursor=u.style.cursor="",(f.canvas?n:u).style.cursor=f.cursor),t.hasOwnProperty("overflow")&&(n.style.overflow=t.overflow),t.hasOwnProperty("touchAction")&&(n.style.touchAction=t.touchAction,u.style.touchAction=t.touchAction)},setStyle:function(t,e){return W(u,t,e)},zoom:E,zoomIn:function(t){return o(!0,t)},zoomOut:function(t){return o(!1,t)},zoomToPoint:S,zoomWithWheel:function(t,e){t.preventDefault();var e=Y(Y(Y({},f),e),{animate:!1}),n=0===t.deltaY&&t.deltaX?t.deltaX:t.deltaY;return S(b(v*Math.exp((n<0?1:-1)*e.step/3),e).scale,t,e,t)}}}return t.defaultOptions=B,t});    
 </script>
+    
+
+
+
     <style>
-        :root { --bg: #1e1e1e; --panel: #2d2d2d; --text: #e0e0e0; --accent: #007acc; --border: #444; --danger: #cc3333; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', monospace; margin: 0; height: 100vh; display: flex; overflow: hidden; }
-        
-        /* --- Sidebar --- */
-        .sidebar { width: 380px; background: var(--panel); padding: 15px; display: flex; flex-direction: column; border-right: 1px solid var(--border); z-index: 10; box-shadow: 2px 0 10px rgba(0,0,0,0.3); }
-        
-        /* Drop Zones */
-        .drop-zone { border: 2px dashed transparent; transition: all 0.2s; padding: 10px; margin-bottom: 15px; background: rgba(255,255,255,0.02); border-radius: 6px; }
-        .drop-zone.drag-over { border-color: var(--accent); background: rgba(0,122,204,0.1); }
-        
-        .control-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        label { font-size: 0.85em; color: #aaa; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin: 0; }
-        .file-count { font-size: 0.75em; color: #666; }
-        
-        input[type="file"] { width: 100%; font-size: 0.8em; color: #ccc; margin-top: 5px; }
-        .file-name-display { font-size: 0.8em; color: var(--accent); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:root { --bg: #1e1e1e; --panel: #2d2d2d; --text: #e0e0e0; --accent: #007acc; --border: #444; --danger: #cc3333; }
 
-        /* Buttons & Controls */
-        .btn-row { display: flex; gap: 5px; margin-bottom: 5px; }
-        .btn { background: #3a3a3a; color: #eee; border: 1px solid #555; padding: 6px 10px; cursor: pointer; border-radius: 4px; flex: 1; font-size: 0.85em; transition: all 0.1s; }
-        .btn:hover { background: #4a4a4a; }
-        .btn.active { background: var(--accent); border-color: var(--accent); color: white; }
-        .btn-icon { flex: 0 0 35px; font-size: 1.1em; padding: 0; display: flex; align-items: center; justify-content: center; }
+body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', monospace; margin: 0; height: 100vh; display: flex; overflow: hidden; }
 
-        #diff-settings { display: none; background: #222; padding: 10px; border-radius: 4px; margin-bottom: 10px; border: 1px solid #444; }
-        .setting-row { margin-bottom: 8px; }
-        .swatch-container { display: flex; gap: 5px; margin-top: 5px; }
-        .swatch { width: 20px; height: 20px; border-radius: 3px; cursor: pointer; border: 1px solid transparent; }
-        .swatch.selected { border-color: white; box-shadow: 0 0 0 2px var(--accent); }
-        
-        .radio-group { display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
-        .radio-label { display: flex; align-items: center; gap: 6px; font-size: 0.85em; cursor: pointer; }
-        
-        /* List */
-        #comp-list { flex: 1; overflow-y: auto; list-style: none; padding: 0; margin: 0; border-top: 1px solid #444; }
-        .comp-item { padding: 8px; border-bottom: 1px solid #444; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; transition: background 0.1s; }
-        .comp-item:hover { background: #383838; }
-        .comp-item.active { background: #005f9e; border-left: 3px solid #66b2ff; }
-        .item-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
-        .diff-score { font-family: monospace; font-weight: bold; color: #aaa; margin-right: 5px; }
-        .comp-item.active .diff-score { color: white; }
-        .btn-del { background: transparent; border: none; color: #777; cursor: pointer; font-size: 1.2em; line-height: 1; padding: 0 5px; }
-        .btn-del:hover { color: var(--danger); }
+/* --- Sidebar --- */
+.sidebar { width: 380px; background: var(--panel); padding: 15px; display: flex; flex-direction: column; border-right: 1px solid var(--border); z-index: 10; box-shadow: 2px 0 10px rgba(0,0,0,0.3); flex-shrink: 0; }
 
-        .hint-text { margin-top: auto; padding-top: 10px; font-size: 0.75em; color: #666; text-align: center; border-top: 1px solid #333; }
+/* Drop Zones */
+.drop-zone { border: 2px dashed transparent; transition: all 0.2s; padding: 10px; margin-bottom: 15px; background: rgba(255,255,255,0.02); border-radius: 6px; }
+.drop-zone.drag-over { border-color: var(--accent); background: rgba(0,122,204,0.1); }
 
-        /* --- Main View --- */
-        .main-view { flex: 1; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; background: #121212; user-select: none; }
-        .wrapper { position: relative; width: 800px; height: 600px; /* Init size, updated by JS */ box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        
-        .layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
-        #base-img-display { z-index: 1; } /* Bottom */
-        #comp-layer { z-index: 2; width: 50%; overflow: hidden; border-right: 1px solid rgba(255,255,255,0.5); background: #121212; }
-        #comp-img-display { width: 800px; /* Matches wrapper width */ height: 100%; object-fit: contain; display: block; }
-        #diff-overlay { z-index: 3; pointer-events: none; opacity: 0; transition: opacity 0.1s; }
-        
-        .no-border { border-right: none !important; }
-        
-        /* Labels (Fixed on screen corners) */
-        .img-label {
-            position: absolute; bottom: 20px; 
-            background: rgba(0, 0, 0, 0.7); color: #eee; 
-            padding: 6px 12px; border-radius: 4px; 
-            font-size: 14px; pointer-events: none; z-index: 1000;
-            text-shadow: 0 1px 2px black;
-            display: none; /* Hidden by default */
-            border: 1px solid #444;
-        }
-        .img-label.left { left: 20px; }
-        .img-label.right { right: 20px; }
+.control-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+label { font-size: 0.85em; color: #aaa; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin: 0; }
+.file-count { font-size: 0.75em; color: #666; }
+input[type="file"] { width: 100%; font-size: 0.8em; color: #ccc; margin-top: 5px; }
+.file-name-display { font-size: 0.8em; color: var(--accent); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-        #global-status { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8em; display: none; z-index: 100; opacity: 0.9; }
+/* Buttons & Controls */
+.btn-row { display: flex; gap: 5px; margin-bottom: 5px; }
+.btn { background: #3a3a3a; color: #eee; border: 1px solid #555; padding: 6px 10px; cursor: pointer; border-radius: 4px; flex: 1; font-size: 0.85em; transition: all 0.1s; }
+.btn:hover { background: #4a4a4a; }
+.btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+.btn-icon { flex: 0 0 35px; font-size: 1.1em; padding: 0; display: flex; align-items: center; justify-content: center; }
+
+#diff-settings { display: none; background: #222; padding: 10px; border-radius: 4px; margin-bottom: 10px; border: 1px solid #444; }
+.setting-row { margin-bottom: 8px; }
+.swatch-container { display: flex; gap: 5px; margin-top: 5px; }
+.swatch { width: 20px; height: 20px; border-radius: 3px; cursor: pointer; border: 1px solid transparent; }
+.swatch.selected { border-color: white; box-shadow: 0 0 0 2px var(--accent); }
+
+.radio-group { display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
+.radio-label { display: flex; align-items: center; gap: 6px; font-size: 0.85em; cursor: pointer; }
+
+/* List */
+#comp-list { flex: 1; overflow-y: auto; list-style: none; padding: 0; margin: 0; border-top: 1px solid #444; }
+.comp-item { padding: 8px; border-bottom: 1px solid #444; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; transition: background 0.1s; }
+.comp-item:hover { background: #383838; }
+.comp-item.active { background: #005f9e; border-left: 3px solid #66b2ff; }
+.item-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+.diff-score { font-family: monospace; font-weight: bold; color: #aaa; margin-right: 5px; }
+.comp-item.active .diff-score { color: white; }
+
+.btn-del { background: transparent; border: none; color: #777; cursor: pointer; font-size: 1.2em; line-height: 1; padding: 0 5px; }
+.btn-del:hover { color: var(--danger); }
+
+.hint-text { margin-top: auto; padding-top: 10px; font-size: 0.75em; color: #666; text-align: center; border-top: 1px solid #333; }
+
+/* --- Main View --- */
+.main-view { 
+    flex: 1; 
+    position: relative; 
+    overflow: hidden; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    background: #121212; 
+    user-select: none; 
+}
+
+.wrapper { 
+    position: relative; 
+    /* Критично: не дает контейнеру сжиматься меньше размера контента, предотвращая баг с размерами */
+    flex-shrink: 0; 
+    box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+}
+
+.layer { 
+    position: absolute; 
+    top: 0; left: 0; 
+    width: 100%; height: 100%; /* Растягиваем по wrapper */
+    object-fit: contain; 
+    display: block; 
+}
+
+#base-img-display { z-index: 1; } /* База (внизу) */
+#comp-img-display { z-index: 2; } /* Сравниваемое (режем clip-path'ом) */
+
+/* Разделительная линия слайдера */
+#slider-line {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 4px rgba(0,0,0,1);
+    z-index: 5;
+    pointer-events: none;
+    display: none; /* Скрыта по умолчанию */
+}
+
+#diff-overlay { z-index: 10; pointer-events: none; opacity: 0; transition: opacity 0.1s; }
+
+/* Labels */
+.img-label {
+    position: absolute; bottom: 20px;
+    background: rgba(0, 0, 0, 0.7); color: #eee;
+    padding: 6px 12px; border-radius: 4px;
+    font-size: 14px; pointer-events: none; z-index: 1000;
+    text-shadow: 0 1px 2px black;
+    display: none;
+    border: 1px solid #444;
+}
+.img-label.left { left: 20px; }
+.img-label.right { right: 20px; }
+
+#global-status { 
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
+    background: #333; color: white; padding: 5px 15px; border-radius: 20px; 
+    font-size: 0.8em; display: none; z-index: 100; opacity: 0.9; 
+}
     </style>
+
+
+
+
 </head>
 <body>
 
@@ -1182,7 +1227,7 @@ var isNode = function () {
                 <label>1. Base Image</label>
             </div>
             <input type="file" id="input-base">
-            <div id="base-name-display" class="file-name-display">Not loaded</div>
+            <div id="base-name-display" class="file-name-display">No file selected</div>
         </div>
         
         <!-- COMPS DROP ZONE -->
@@ -1225,9 +1270,6 @@ var isNode = function () {
             </div>
 
             <button class="btn" id="btn-hold" style="width:100%; margin-top:5px; background: #444;">Hold to Swap</button>
-            <!--
-            <button class="btn" id="btn-sort" style="width:100%; margin-top:5px;" onclick="updateListSorted()">Sort by Similarity</button>
-            -->
         </div>
 
         <!-- LIST -->
@@ -1238,221 +1280,315 @@ var isNode = function () {
     </div>
 
     <div class="main-view">
-        <div id="global-status">Ready</div>
+        <div id="global-status">Ready.</div>
+        
         <div id="panzoom-container" class="wrapper">
-            <!-- 1. Base Image (Right Side in Slider / Background) -->
+            <!-- 1. Base Image (Нижний слой / Справа на слайдере) -->
             <img id="base-img-display" class="layer" src="">
             
-            <!-- 2. Comparison Image Layer (Left Side in Slider / Masked) -->
-            <div id="comp-layer" class="layer">
-                <img id="comp-img-display" src="">
-            </div>
+            <!-- 2. Comparison Image (Верхний слой / Слева на слайдере / Обрезается clip-path) -->
+            <img id="comp-img-display" class="layer" src="">
 
-            <!-- 3. Diff Overlay (Top) -->
+            <!-- 3. Slider Line (Разделитель) -->
+            <div id="slider-line"></div>
+
+            <!-- 4. Diff Overlay (Самый верхний слой) -->
             <img id="diff-overlay" class="layer" src="">
         </div>
 
         <!-- Labels (Fixed in Main View) -->
-        <div id="label-left" class="img-label left">Modified</div>
-        <div id="label-right" class="img-label right">Base</div>
+        <div id="label-left" class="img-label left"></div>
+        <div id="label-right" class="img-label right"></div>
     </div>
 
 <script>
-    /* --- STATE --- */
-    let baseData = null; 
-    let compsList = []; 
-    let currentId = null; 
-    let viewMode = 'slider'; 
-    let diffColor = { red: 255, green: 0, blue: 255 };
-    let sensitivity = 'all'; 
-    let pz; 
-    let labelTimer = null;
+/* --- STATE --- */
+let baseData = null;
+let compsList = [];
+let currentId = null;
+let viewMode = 'slider'; // 'slider' | 'diff'
+let diffColor = { red: 255, green: 0, blue: 255 };
+let sensitivity = 'all';
+let pz;
+let labelTimer = null;
+
+const MODES = ['all', 'colors', 'aa'];
+
+/* --- INIT --- */
+$(document).ready(() => {
+    const elem = document.getElementById('panzoom-container');
+    pz = Panzoom(elem, { maxScale: 15, canvas: true });
+    elem.parentElement.addEventListener('wheel', pz.zoomWithWheel);
+
+    initDragDrop();
+    setupEventHandlers();
+});
+
+function showStatus(msg, autoHide=false) {
+    $('#global-status').text(msg).show();
+    if(autoHide) setTimeout(() => $('#global-status').fadeOut(), 3000);
+}
+
+/* --- DRAG & DROP LOGIC --- */
+function initDragDrop() {
+    const setupZone = (id, isBase) => {
+        const $zone = $(id);
+        $zone.on('dragover dragenter', (e) => { e.preventDefault(); e.stopPropagation(); $zone.addClass('drag-over'); });
+        $zone.on('dragleave dragend drop', (e) => { e.preventDefault(); e.stopPropagation(); $zone.removeClass('drag-over'); });
+        $zone.on('drop', async (e) => {
+            const files = e.originalEvent.dataTransfer.files;
+            if(files.length > 0) {
+                if(isBase) handleBaseFiles([files[0]]);
+                else handleCompFiles(files);
+            }
+        });
+    };
+    setupZone('#zone-base', true);
+    setupZone('#zone-comps', false);
+}
+
+/* --- FILE PROCESSING --- */
+$('#input-base').change((e) => handleBaseFiles(e.target.files));
+$('#input-comps').change((e) => handleCompFiles(e.target.files));
+
+function handleBaseFiles(files) {
+    if(!files || !files.length) return;
+    const file = files[0];
     
-    const MODES = ['all', 'colors', 'aa'];
-
-    /* --- INIT --- */
-    $(document).ready(() => {
-        const elem = document.getElementById('panzoom-container');
-        pz = Panzoom(elem, { maxScale: 15, canvas: true });
-        elem.parentElement.addEventListener('wheel', pz.zoomWithWheel);
-        
-        initDragDrop();
-        setupEventHandlers();
-    });
-
-    function showStatus(msg, autoHide=false) {
-        $('#global-status').text(msg).show();
-        if(autoHide) setTimeout(() => $('#global-status').fadeOut(), 3000);
-    }
-
-    /* --- DRAG & DROP LOGIC --- */
-    function initDragDrop() {
-        const setupZone = (id, isBase) => {
-            const $zone = $(id);
-            $zone.on('dragover dragenter', (e) => { e.preventDefault(); e.stopPropagation(); $zone.addClass('drag-over'); });
-            $zone.on('dragleave dragend drop', (e) => { e.preventDefault(); e.stopPropagation(); $zone.removeClass('drag-over'); });
-            $zone.on('drop', async (e) => {
-                const files = e.originalEvent.dataTransfer.files;
-                if(files.length > 0) {
-                    if(isBase) handleBaseFiles([files[0]]); 
-                    else handleCompFiles(files);
-                }
-            });
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = async () => {
+            baseData = { src: e.target.result, w: img.width, h: img.height, name: file.name };
+            
+            $('#base-name-display').text(`${file.name} (${img.width}x${img.height})`);
+            
+            // Устанавливаем размеры ТОЛЬКО на обертку.
+            $('.wrapper').css({ width: img.width + 'px', height: img.height + 'px' });
+            
+            // Пересчитываем сравнения если уже есть
+            if(compsList.length > 0) await recalculateAllComps();
+            
+            updateView();
         };
-        setupZone('#zone-base', true);
-        setupZone('#zone-comps', false);
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+async function handleCompFiles(files) {
+    if(!files || !files.length) return;
+    showStatus(`Processing ${files.length} new files...`);
+
+    for(let i=0; i<files.length; i++) {
+        await addCompImage(files[i]);
     }
 
-    /* --- FILE PROCESSING --- */
-    $('#input-base').change((e) => handleBaseFiles(e.target.files));
-    $('#input-comps').change((e) => handleCompFiles(e.target.files));
+    // FIX: Обновляем UI (сортировка + рендер) после добавления всех файлов
+    updateListSorted();
 
-    function handleBaseFiles(files) {
-        if(!files || !files.length) return;
-        const file = files[0];
+    // Если ничего не выбрано, выбираем первое
+    if(!currentId && compsList.length > 0) selectComp(compsList[0].id);
+    
+    showStatus('Done.', true);
+}
+
+function addCompImage(file) {
+    return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (e) => {
-            const img = new Image();
-            img.onload = async () => {
-                baseData = { src: e.target.result, w: img.width, h: img.height, name: file.name };
-                $('#base-name-display').text(`${file.name} (${img.width}x${img.height})`);
-                
-                $('.wrapper').css({ width: img.width + 'px', height: img.height + 'px' });
-                $('#comp-img-display').css('width', img.width + 'px');
+            const src = e.target.result;
+            const item = { id: Date.now() + Math.random().toString(), name: file.name, src: src, results: {} };
 
-                if(compsList.length > 0) await recalculateAllComps();
-                updateView();
-            }
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-
-    async function handleCompFiles(files) {
-        if(!files || !files.length) return;
-        showStatus(`Processing ${files.length} new files...`);
-
-        for(let i=0; i<files.length; i++) {
-            await addCompImage(files[i]);
-            showStatus(`Calculated ${i+1}/${files.length}`);
-        }
-        
-        updateListSorted();
-        if(!currentId && compsList.length > 0) selectComp(compsList[0].id);
-        showStatus('Done.', true);
-    }
-
-    function addCompImage(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const src = e.target.result;
-                const item = { id: Date.now() + Math.random().toString(), name: file.name, src: src, results: {} };
-
-                if(!baseData) {
-                    MODES.forEach(m => item.results[m] = { mismatch: 0, diffSrc: null });
+            if(!baseData) {
+                MODES.forEach(m => item.results[m] = { mismatch: 0, diffSrc: null });
+                compsList.push(item);
+                resolve();
+            } else {
+                calculateAllModes(baseData.src, src).then(results => {
+                    item.results = results;
                     compsList.push(item);
                     resolve();
-                } else {
-                    calculateAllModes(baseData.src, src).then(results => {
-                        item.results = results;
-                        compsList.push(item);
-                        resolve();
-                    });
-                }
-            };
-            reader.readAsDataURL(file);
+                });
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+async function calculateAllModes(baseSrc, compSrc) {
+    const run = (mode) => new Promise((res) => {
+        let r = resemble(baseSrc).compareTo(compSrc);
+        if(mode === 'colors') r.ignoreColors();
+        if(mode === 'aa') r.ignoreAntialiasing();
+        r.onComplete((data) => {
+            res({ mismatch: parseFloat(data.misMatchPercentage), diffSrc: data.getImageDataUrl() });
         });
+    });
+
+    resemble.outputSettings({ errorColor: diffColor, errorType: 'flat', transparency: 0.3 });
+    
+    const [rAll, rColors, rAA] = await Promise.all([run('all'), run('colors'), run('aa')]);
+    return { all: rAll, colors: rColors, aa: rAA };
+}
+
+async function recalculateAllComps() {
+    showStatus('Recalculating...');
+    for(let item of compsList) {
+        item.results = await calculateAllModes(baseData.src, item.src);
     }
+    updateListSorted();
+    showStatus('Done.', true);
+}
 
-    async function calculateAllModes(baseSrc, compSrc) {
-        const run = (mode) => new Promise((res) => {
-            let r = resemble(baseSrc).compareTo(compSrc);
-            if(mode === 'colors') r.ignoreColors();
-            if(mode === 'aa') r.ignoreAntialiasing();
+/* --- UI LIST --- */
+function updateListSorted() {
+    // Сортировка по возрастанию % отличий (самые похожие сверху)
+    compsList.sort((a, b) => a.results[sensitivity].mismatch - b.results[sensitivity].mismatch);
+    renderListHTML();
+    $('#comp-count').text(`${compsList.length} items`);
+}
 
-            r.onComplete((data) => {
-                res({ mismatch: parseFloat(data.misMatchPercentage), diffSrc: data.getImageDataUrl() });
-            });
-        });
-        resemble.outputSettings({ errorColor: diffColor, errorType: 'flat', transparency: 0.3 });
-        const [rAll, rColors, rAA] = await Promise.all([run('all'), run('colors'), run('aa')]);
-        return { all: rAll, colors: rColors, aa: rAA };
-    }
-
-    async function recalculateAllComps() {
-        showStatus('Recalculating...');
-        for(let item of compsList) {
-            item.results = await calculateAllModes(baseData.src, item.src);
-        }
-        updateListSorted();
-        showStatus('Done.', true);
-    }
-
-    /* --- UI LIST --- */
-    function updateListSorted() {
-        compsList.sort((a, b) => a.results[sensitivity].mismatch - b.results[sensitivity].mismatch);
-        renderListHTML();
-        $('#comp-count').text(`${compsList.length} items`);
-    }
-
-    function renderListHTML() {
-        const $ul = $('#comp-list');
-        $ul.empty();
-        compsList.forEach((item) => {
-            const metric = item.results[sensitivity];
-            const isActive = item.id === currentId;
-            const html = `
+function renderListHTML() {
+    const $ul = $('#comp-list');
+    $ul.empty();
+    compsList.forEach((item) => {
+        const metric = item.results[sensitivity];
+        const isActive = item.id === currentId;
+        // Округляем до 2 знаков для красоты
+        const scoreVal = metric ? metric.mismatch.toFixed(2) : '0.00';
+        
+        const html = `
             <li class="comp-item ${isActive ? 'active' : ''}" onclick="selectComp('${item.id}')">
                 <button class="btn-del" onclick="deleteComp(event, '${item.id}')">×</button>
                 <div class="item-name" title="${item.name}">${item.name}</div>
-                <div class="diff-score">${metric.mismatch}%</div>
-            </li>`;
-            $ul.append(html);
-        });
-    }
+                <div class="diff-score">${scoreVal}%</div>
+            </li>
+        `;
+        $ul.append(html);
+    });
+}
 
-    window.deleteComp = function(e, id) {
-        e.stopPropagation();
-        const idx = compsList.findIndex(x => x.id === id);
-        if(idx === -1) return;
-        if(id === currentId) {
-            if(compsList.length > 1) {
-                const newIdx = idx > 0 ? idx - 1 : idx + 1;
-                selectComp(compsList[newIdx].id);
-            } else {
-                currentId = null;
-                $('#comp-img-display').attr('src', '');
-                $('#diff-overlay').attr('src', '');
-                flashLabels();
-            }
+window.deleteComp = function(e, id) {
+    e.stopPropagation();
+    const idx = compsList.findIndex(x => x.id === id);
+    if(idx === -1) return;
+    
+    if(id === currentId) {
+        if(compsList.length > 1) {
+            const newIdx = idx > 0 ? idx - 1 : idx + 1;
+            selectComp(compsList[newIdx].id);
+        } else {
+            currentId = null;
+            $('#comp-img-display').attr('src', '');
+            $('#diff-overlay').attr('src', '');
+            updateView();
         }
-        compsList.splice(idx, 1);
-        updateListSorted();
+    }
+    compsList.splice(idx, 1);
+    updateListSorted();
+};
+
+window.selectComp = function(id) {
+    currentId = id;
+    renderListHTML(); // Перерисовка для обновления класса .active
+    updateView();
+};
+
+/* --- VIEW & SLIDER LOGIC --- */
+let lastSliderPct = 50;
+
+function updateView() {
+    if(!currentId || !baseData) { 
+        $('.img-label').hide(); 
+        return; 
     }
 
-    window.selectComp = function(id) {
-        currentId = id;
-        renderListHTML();
-        updateView();
+    const item = compsList.find(x => x.id === currentId);
+    if(!item) return;
+
+    $('#base-img-display').attr('src', baseData.src);
+    $('#comp-img-display').attr('src', item.src);
+    
+    const diffData = item.results[sensitivity].diffSrc;
+    $('#diff-overlay').attr('src', diffData || '');
+
+    if (viewMode === 'diff' && diffData) {
+        $('#diff-overlay').css('opacity', 1);
+        $('#slider-line').hide();
+        $('#comp-img-display').css('clip-path', 'none');
+        $('#comp-img-display').css('opacity', 1);
+    } else {
+        $('#diff-overlay').css('opacity', 0);
+        $('#comp-img-display').css('opacity', 1);
+        applySliderClip(lastSliderPct);
+        $('#slider-line').show();
     }
+    flashLabels();
+}
+
+function applySliderClip(pct) {
+    const insetRight = 100 - pct;
+    $('#comp-img-display').css('clip-path', `inset(0 ${insetRight}% 0 0)`);
+    $('#slider-line').css('left', `${pct}%`);
+}
+
+/* --- LABELS LOGIC --- */
+function flashLabels(forceState = null) {
+    if (!baseData || !currentId) {
+        $('.img-label').hide();
+        return;
+    }
+
+    const item = compsList.find(x => x.id === currentId);
+    const baseName = baseData.name;
+    const compName = item.name;
+
+    let txtLeft = '', txtRight = '';
+
+    if (forceState === 'hover_swap') {
+        txtLeft = compName;
+        txtRight = '';
+    } else if (forceState === 'hold_swap') {
+        txtLeft = '';
+        txtRight = baseName;
+    } else {
+        if (viewMode === 'slider') {
+            txtLeft = compName;
+            txtRight = baseName;
+        } else {
+            txtLeft = compName; 
+            txtRight = '';
+        }
+    }
+
+    $('#label-left').text(txtLeft).toggle(!!txtLeft);
+    $('#label-right').text(txtRight).toggle(!!txtRight);
+
+    $('.img-label').stop(true, true).css('opacity', 1).show();
+    
+    if (labelTimer) clearTimeout(labelTimer);
+    if (!forceState) {
+        labelTimer = setTimeout(() => {
+            $('.img-label').fadeOut(500);
+        }, 2000);
+    }
+}
+
+function setupEventHandlers() {
+    $('#toggle-settings').click(() => $('#diff-settings').slideToggle(200));
 
     $('input[name="sens"]').change(function() {
         sensitivity = $(this).val();
         updateListSorted();
-        updateView(); 
+        updateView();
     });
 
     $('.swatch').click(function() {
-        // Visual color switch
         $('.swatch').removeClass('selected');
         $(this).addClass('selected');
-
-        // Update global vars
         const c = $(this).data('color');
         diffColor = { red: c.r, green: c.g, blue: c.b };
-
-        // Recalculate (all, colors, aa)
         if(currentId && baseData) {
             const item = compsList.find(x => x.id === currentId);
             calculateAllModes(baseData.src, item.src).then(results => {
@@ -1462,190 +1598,107 @@ var isNode = function () {
         }
     });
 
-    /* --- VIEW RENDERING --- */
-    function updateView() {
-        if(!currentId || !baseData) { flashLabels(); return; }
-        
-        const item = compsList.find(x => x.id === currentId);
-        if(!item) return;
+    $('#mode-slider').click(function() {
+        viewMode = 'slider';
+        $('.btn').removeClass('active'); $(this).addClass('active');
+        updateView();
+    });
 
-        $('#base-img-display').attr('src', baseData.src);
-        $('#comp-img-display').attr('src', item.src);
+    $('#mode-diff').click(function() {
+        viewMode = 'diff';
+        $('.btn').removeClass('active'); $(this).addClass('active');
+        updateView();
+    });
+
+    setupSliderInteraction();
+}
+
+/* --- SLIDER & HOLD INTERACTION --- */
+function setupSliderInteraction() {
+    let isHoldingSwap = false;
+    let isHoveringSwap = false;
+
+    const $swapBtn = $('#btn-hold');
+    const $compImg = $('#comp-img-display');
+    const $diffOverlay = $('#diff-overlay');
+    const $sliderLine = $('#slider-line');
+
+    $('.wrapper').mousemove(function(e) {
+        if (viewMode !== 'slider' || isHoldingSwap || isHoveringSwap) return;
+
+        const rect = this.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        let pct = (x / rect.width) * 100;
+        pct = Math.max(0, Math.min(100, pct));
         
-        const diffData = item.results[sensitivity].diffSrc;
-        
-        if (viewMode === 'diff' && diffData) {
-            $('#diff-overlay').attr('src', diffData).css('opacity', 1);
-            // Показываем слой сравнения на всю ширину под Diff, чтобы видеть контекст варианта, а не базы
-            $('#comp-layer').css({ opacity: 1, width: '100%' }).addClass('no-border');
-        } else {
-            $('#diff-overlay').css('opacity', 0);
-            $('#comp-layer').css('opacity', 1).removeClass('no-border');
+        lastSliderPct = pct;
+        applySliderClip(pct);
+    });
+
+    $swapBtn.mouseenter(() => {
+        isHoveringSwap = true;
+        if (viewMode === 'slider') {
+            applySliderClip(100);
+            $sliderLine.hide();
+        } else if (viewMode === 'diff') {
+            $diffOverlay.css('opacity', 0);
+            $compImg.css('opacity', 1);
         }
+        flashLabels('hover_swap');
+    });
 
-        
-        flashLabels(); // Show labels for 2 seconds
-    }
+    $swapBtn.mouseleave(() => {
+        isHoveringSwap = false;
+        if (!isHoldingSwap) resetViewToCurrentMode();
+    });
 
-    /* --- LABELS LOGIC --- */
-    function flashLabels(forceState = null) {
-        if (!baseData || !currentId) {
-            $('.img-label').hide();
-            return;
+    $swapBtn.mousedown((e) => {
+        if(e.button !== 0) return;
+        isHoldingSwap = true;
+        if (viewMode === 'slider') {
+            applySliderClip(0);
+            $sliderLine.hide();
+        } else if (viewMode === 'diff') {
+            $diffOverlay.css('opacity', 0);
+            $compImg.css('opacity', 0);
         }
-        
-        const item = compsList.find(x => x.id === currentId);
-        const baseName = baseData.name;
-        const compName = item.name;
-        
-        let txtLeft = '', txtRight = '';
-        
-        if (forceState === 'hover_swap') {
-            // Showing COMP full
-            txtLeft = compName; 
-            txtRight = ''; 
-        } else if (forceState === 'hold_swap') {
-            // Showing BASE full
-            txtLeft = '';
-            txtRight = baseName;
-        } else {
-            // Normal Mode
-            if (viewMode === 'slider') {
-                txtLeft = compName;
-                txtRight = baseName;
-            } else {
-                txtLeft = compName; // Diff doesn't show base
-                txtRight = '';
-            }
-        }
+        flashLabels('hold_swap');
+    });
 
-        // Apply Text
-        $('#label-left').text(txtLeft).toggle(!!txtLeft);
-        $('#label-right').text(txtRight).toggle(!!txtRight);
-
-        // Visibility Logic
-        $('.img-label').stop(true, true).css('opacity', 1).show();
-
-        if (labelTimer) clearTimeout(labelTimer);
-        
-        // If forceState is active (interacting), keep shown. Else fade out.
-        if (!forceState) {
-            labelTimer = setTimeout(() => {
-                $('.img-label').fadeOut(500);
-            }, 2000);
-        }
-    }
-
-    function setupEventHandlers() {
-        $('#toggle-settings').click(() => $('#diff-settings').slideToggle(200));
-        
-        $('#mode-slider').click(function() { 
-            viewMode = 'slider'; 
-            $('.btn').removeClass('active'); $(this).addClass('active'); 
-            updateView(); 
-        });
-        
-        $('#mode-diff').click(function() { 
-            viewMode = 'diff'; 
-            $('.btn').removeClass('active'); $(this).addClass('active'); 
-            updateView(); 
-        });
-
-        setupSliderInteraction();
-    }
-
-    /* --- SLIDER & HOLD INTERACTION --- */
-    function setupSliderInteraction() {
-        let lastSliderPct = 50;
-        let isHoldingSwap = false;
-        let isHoveringSwap = false;
-        
-        const $swapBtn = $('#btn-hold');
-        const $sliderLayer = $('#comp-layer');
-        const $diffOverlay = $('#diff-overlay');
-
-        // SLIDER MOVE
-        $('.wrapper').mousemove(function(e) {
-            if (viewMode !== 'slider' || isHoldingSwap || isHoveringSwap) return;
-            const rect = this.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            let pct = (x / rect.width) * 100;
-            pct = Math.max(0, Math.min(100, pct));
-            lastSliderPct = pct;
-            $sliderLayer.css('width', pct + '%');
-        });
-
-        // HOVER (Show COMP)
-        $swapBtn.mouseenter(() => {
-            isHoveringSwap = true;
-            $sliderLayer.addClass('no-border');
-            
-            if (viewMode === 'slider') {
-                $sliderLayer.css('width', '100%');
-            } else if (viewMode === 'diff') {
-                $diffOverlay.css('opacity', 0);
-                $sliderLayer.css('opacity', 1);
-                $sliderLayer.css('width', '100%');
-            }
-            flashLabels('hover_swap');
-        });
-
-        $swapBtn.mouseleave(() => {
-            isHoveringSwap = false;
-            if (!isHoldingSwap) resetView();
-        });
-
-        // HOLD (Show BASE)
-        $swapBtn.mousedown((e) => {
-            if(e.button !== 0) return;
-            isHoldingSwap = true;
-            $sliderLayer.addClass('no-border');
-            
-            // Hide Comp -> Show Base
-            if (viewMode === 'slider') {
-                $sliderLayer.css('width', '0%');
-            } else if (viewMode === 'diff') {
-                $diffOverlay.css('opacity', 0);
-                $sliderLayer.css('opacity', 1);
-                $sliderLayer.css('width', '0%');
-            }
-            flashLabels('hold_swap');
-        });
-
-        $(window).mouseup(() => {
-            if(isHoldingSwap) {
-                isHoldingSwap = false;
-                // If still hovering, return to Hover state (Full Comp)
-                if ($swapBtn.is(':hover')) {
-                    isHoveringSwap = true;
-                    if (viewMode === 'slider') {
-                        $sliderLayer.css('width', '100%');
-                    } else if (viewMode === 'diff') {
-                        $diffOverlay.css('opacity', 0);
-                        $sliderLayer.css('opacity', 1);
-                        $sliderLayer.css('width', '100%');
-                    }
-                    flashLabels('hover_swap');
+    $(window).mouseup(() => {
+        if(isHoldingSwap) {
+            isHoldingSwap = false;
+            if ($swapBtn.is(':hover')) {
+                isHoveringSwap = true;
+                if (viewMode === 'slider') {
+                    applySliderClip(100);
+                    $sliderLine.hide();
                 } else {
-                    resetView();
+                    $diffOverlay.css('opacity', 0);
+                    $compImg.css('opacity', 1);
                 }
-            }
-        });
-
-        function resetView() {
-            $sliderLayer.removeClass('no-border');
-            flashLabels(); // Trigger fade out
-            
-            if (viewMode === 'slider') {
-                $sliderLayer.css('width', lastSliderPct + '%');
-                $sliderLayer.css('opacity', 1);
-                $diffOverlay.css('opacity', 0);
-            } else if (viewMode === 'diff') {
-                $diffOverlay.css('opacity', 1);
-                $sliderLayer.css('opacity', 0);
+                flashLabels('hover_swap');
+            } else {
+                resetViewToCurrentMode();
             }
         }
+    });
+
+    function resetViewToCurrentMode() {
+        flashLabels();
+        if (viewMode === 'slider') {
+            applySliderClip(lastSliderPct);
+            $sliderLine.show();
+            $compImg.css('opacity', 1);
+            $diffOverlay.css('opacity', 0);
+        } else if (viewMode === 'diff') {
+            $compImg.css('clip-path', 'none');
+            $sliderLine.hide();
+            $diffOverlay.css('opacity', 1);
+            $compImg.css('opacity', 1);
+        }
     }
+}
 </script>
 </body>
 </html>

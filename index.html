@@ -19,7 +19,7 @@
                 <label>1. Base Image</label>
             </div>
             <input type="file" id="input-base">
-            <div id="base-name-display" class="file-name-display">Not loaded</div>
+            <div id="base-name-display" class="file-name-display">No file selected</div>
         </div>
         
         <!-- COMPS DROP ZONE -->
@@ -62,9 +62,6 @@
             </div>
 
             <button class="btn" id="btn-hold" style="width:100%; margin-top:5px; background: #444;">Hold to Swap</button>
-            <!--
-            <button class="btn" id="btn-sort" style="width:100%; margin-top:5px;" onclick="updateListSorted()">Sort by Similarity</button>
-            -->
         </div>
 
         <!-- LIST -->
@@ -75,24 +72,27 @@
     </div>
 
     <div class="main-view">
-        <div id="global-status">Ready</div>
+        <div id="global-status">Ready.</div>
+        
         <div id="panzoom-container" class="wrapper">
-            <!-- 1. Base Image (Right Side in Slider / Background) -->
+            <!-- 1. Base Image (Нижний слой / Справа на слайдере) -->
             <img id="base-img-display" class="layer" src="">
             
-            <!-- 2. Comparison Image Layer (Left Side in Slider / Masked) -->
-            <div id="comp-layer" class="layer">
-                <img id="comp-img-display" src="">
-            </div>
+            <!-- 2. Comparison Image (Верхний слой / Слева на слайдере / Обрезается clip-path) -->
+            <img id="comp-img-display" class="layer" src="">
 
-            <!-- 3. Diff Overlay (Top) -->
+            <!-- 3. Slider Line (Разделитель) -->
+            <div id="slider-line"></div>
+
+            <!-- 4. Diff Overlay (Самый верхний слой) -->
             <img id="diff-overlay" class="layer" src="">
         </div>
 
         <!-- Labels (Fixed in Main View) -->
-        <div id="label-left" class="img-label left">Modified</div>
-        <div id="label-right" class="img-label right">Base</div>
+        <div id="label-left" class="img-label left"></div>
+        <div id="label-right" class="img-label right"></div>
     </div>
-<script src="script.js"></script>
+
+    <script src="script.js"></script>
 </body>
 </html>

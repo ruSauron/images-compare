@@ -1,8 +1,9 @@
 :root { --bg: #1e1e1e; --panel: #2d2d2d; --text: #e0e0e0; --accent: #007acc; --border: #444; --danger: #cc3333; }
+
 body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', monospace; margin: 0; height: 100vh; display: flex; overflow: hidden; }
 
 /* --- Sidebar --- */
-.sidebar { width: 380px; background: var(--panel); padding: 15px; display: flex; flex-direction: column; border-right: 1px solid var(--border); z-index: 10; box-shadow: 2px 0 10px rgba(0,0,0,0.3); }
+.sidebar { width: 380px; background: var(--panel); padding: 15px; display: flex; flex-direction: column; border-right: 1px solid var(--border); z-index: 10; box-shadow: 2px 0 10px rgba(0,0,0,0.3); flex-shrink: 0; }
 
 /* Drop Zones */
 .drop-zone { border: 2px dashed transparent; transition: all 0.2s; padding: 10px; margin-bottom: 15px; background: rgba(255,255,255,0.02); border-radius: 6px; }
@@ -11,7 +12,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', monos
 .control-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
 label { font-size: 0.85em; color: #aaa; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin: 0; }
 .file-count { font-size: 0.75em; color: #666; }
-
 input[type="file"] { width: 100%; font-size: 0.8em; color: #ccc; margin-top: 5px; }
 .file-name-display { font-size: 0.8em; color: var(--accent); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -39,34 +39,71 @@ input[type="file"] { width: 100%; font-size: 0.8em; color: #ccc; margin-top: 5px
 .item-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
 .diff-score { font-family: monospace; font-weight: bold; color: #aaa; margin-right: 5px; }
 .comp-item.active .diff-score { color: white; }
+
 .btn-del { background: transparent; border: none; color: #777; cursor: pointer; font-size: 1.2em; line-height: 1; padding: 0 5px; }
 .btn-del:hover { color: var(--danger); }
 
 .hint-text { margin-top: auto; padding-top: 10px; font-size: 0.75em; color: #666; text-align: center; border-top: 1px solid #333; }
 
 /* --- Main View --- */
-.main-view { flex: 1; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; background: #121212; user-select: none; }
-.wrapper { position: relative; width: 800px; height: 600px; /* Init size, updated by JS */ box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+.main-view { 
+    flex: 1; 
+    position: relative; 
+    overflow: hidden; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    background: #121212; 
+    user-select: none; 
+}
 
-.layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
-#base-img-display { z-index: 1; } /* Bottom */
-#comp-layer { z-index: 2; width: 50%; overflow: hidden; border-right: 1px solid rgba(255,255,255,0.5); background: #121212; }
-#comp-img-display { width: 800px; /* Matches wrapper width */ height: 100%; object-fit: contain; display: block; }
-#diff-overlay { z-index: 3; pointer-events: none; opacity: 0; transition: opacity 0.1s; }
+.wrapper { 
+    position: relative; 
+    /* Критично: не дает контейнеру сжиматься меньше размера контента, предотвращая баг с размерами */
+    flex-shrink: 0; 
+    box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+}
 
-.no-border { border-right: none !important; }
+.layer { 
+    position: absolute; 
+    top: 0; left: 0; 
+    width: 100%; height: 100%; /* Растягиваем по wrapper */
+    object-fit: contain; 
+    display: block; 
+}
 
-/* Labels (Fixed on screen corners) */
+#base-img-display { z-index: 1; } /* База (внизу) */
+#comp-img-display { z-index: 2; } /* Сравниваемое (режем clip-path'ом) */
+
+/* Разделительная линия слайдера */
+#slider-line {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 4px rgba(0,0,0,1);
+    z-index: 5;
+    pointer-events: none;
+    display: none; /* Скрыта по умолчанию */
+}
+
+#diff-overlay { z-index: 10; pointer-events: none; opacity: 0; transition: opacity 0.1s; }
+
+/* Labels */
 .img-label {
-    position: absolute; bottom: 20px; 
-    background: rgba(0, 0, 0, 0.7); color: #eee; 
-    padding: 6px 12px; border-radius: 4px; 
+    position: absolute; bottom: 20px;
+    background: rgba(0, 0, 0, 0.7); color: #eee;
+    padding: 6px 12px; border-radius: 4px;
     font-size: 14px; pointer-events: none; z-index: 1000;
     text-shadow: 0 1px 2px black;
-    display: none; /* Hidden by default */
+    display: none;
     border: 1px solid #444;
 }
 .img-label.left { left: 20px; }
 .img-label.right { right: 20px; }
 
-#global-status { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8em; display: none; z-index: 100; opacity: 0.9; }
+#global-status { 
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
+    background: #333; color: white; padding: 5px 15px; border-radius: 20px; 
+    font-size: 0.8em; display: none; z-index: 100; opacity: 0.9; 
+}
